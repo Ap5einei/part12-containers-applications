@@ -1,0 +1,14 @@
+docker run -it ubuntu bash
+
+#:
+mkdir -p /usr/src/app
+echo 'console.log("Hello world")' > /usr/src/app/index.js
+cat /usr/src/app/index.js
+apt update && apt install -y curl ca-certificates
+curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+apt install -y nodejs
+node -v
+node /usr/src/app/index.js
+
+#
+exit
