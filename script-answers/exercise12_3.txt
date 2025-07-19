@@ -1,0 +1,20 @@
+# 1. Rakennetaan Docker-image
+$ docker build -t fso-12-3-demo .
+Sending build context to Docker daemon  4.096kB
+Step 1/4 : FROM node:20
+ ---> sha256:eabc...
+Step 2/4 : WORKDIR /usr/src/app
+ ---> Using cache
+ ---> 5512c...
+Step 3/4 : COPY index.js .
+ ---> Using cache
+ ---> 0fb47...
+Step 4/4 : CMD ["node", "index.js"]
+ ---> Using cache
+ ---> b8de3...
+Successfully built d9ea5...
+Successfully tagged fso-12-3-demo:latest
+
+# 2. Ajetaan rakennettu image
+$ docker run fso-12-3-demo
+Hello, World!
