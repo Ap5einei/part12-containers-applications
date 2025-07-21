@@ -1,7 +1,8 @@
-version: '3'
+version: '3.8'
 services:
   app:
     build: .
-    container_name: hello-world-app
     ports:
       - "3000:3000"
+    env_file:
+      - .env
