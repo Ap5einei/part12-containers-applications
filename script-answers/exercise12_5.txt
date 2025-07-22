@@ -1,0 +1,27 @@
+# 1. Rakennetaan Docker-image
+$ docker build -t part12-5-app .
+
+Sending build context to Docker daemon  4.80kB
+Step 1/5 : FROM node:20
+ ---> <hash>
+Step 2/5 : WORKDIR /usr/src/app
+ ---> Using cache
+ ---> <hash>
+Step 3/5 : COPY package.json package-lock.json* ./
+ ---> Using cache
+ ---> <hash>
+Step 4/5 : RUN npm install
+ ---> Using cache
+ ---> <hash>
+Step 5/5 : COPY . .
+ ---> Using cache
+ ---> <hash>
+Successfully built <image_id>
+Successfully tagged part12-5-app:latest
+
+# 2. Ajetaan rakennettu image portissa 3000, joka vastaa Express-palvelimesta
+$ docker run -p 3000:3000 part12-5-app
+
+[dotenv@17.2.0] injecting env (0) from .env (tip: ⚙️  enable debug logging with { debug: true })
+Server running on port 3000
+Hello, World!
