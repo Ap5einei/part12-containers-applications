@@ -1,3 +1,4 @@
+// app.js
 const express = require('express');
 const logger = require('morgan');
 const cors = require('cors');
@@ -8,7 +9,6 @@ const todosRouter = require('./routes/todos');
 const app = express();
 
 app.use(cors());
-
 app.use(logger('dev'));
 app.use(express.json());
 

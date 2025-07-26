@@ -1,49 +1,79 @@
+// routes/todos.js
 const express = require('express');
-const { Todo } = require('../mongo')
+const { Todo } = require('../mongo');
 const router = express.Router();
 
-/* GET todos listing. */
+// Hae kaikki todo-kohteet
 router.get('/', async (_, res) => {
-  const todos = await Todo.find({})
-  res.send(todos);
+  try {
+    const todos = await Todo.find({});
+    res.json(todos);
+  } catch (error) {
+    console.error('Failed to fetch todos:', error);
+    res.status(500).json({ error: 'Failed to fetch todos' });
+  }
 });
 
-/* POST todo to listing. */
+// Lisää uusi todo-kohde
 router.post('/', async (req, res) => {
-  const todo = await Todo.create({
-    text: req.body.text,
-    done: false
-  })
-  res.send(todo);
+  try {
+    const todo = await Todo.create({
+      text: req.body.text,
+      done: false
+    });
+    res.status(201).json(todo);
+  } catch (error) {
+    console.error('Failed to create todo:', error);
+    res.status(400).json({ error: 'Failed to create todo' });
+  }
 });
 
 const singleRouter = express.Router();
 
+// Middleware hakee todo-kohteen id:n perusteella
 const findByIdMiddleware = async (req, res, next) => {
-  const { id } = req.params
-  req.todo = await Todo.findById(id)
-  if (!req.todo) return res.sendStatus(404)
+  try {
+    const { id } = req.params;
+    const todo = await Todo.findById(id);
+    if (!todo) {
+      return res.status(404).json({ error: 'Todo not found' });
+    }
+    req.todo = todo;
+    next();
+  } catch (error) {
+    console.error('Invalid ID or error searching todo:', error);
+    return res.status(400).json({ error: 'Invalid ID' });
+  }
+};
 
-  next()
-}
-
-/* DELETE todo. */
-singleRouter.delete('/', async (req, res) => {
-  await req.todo.delete()  
-  res.sendStatus(200);
+singleRouter.get('/', (req, res) => {
+  res.json(req.todo);
 });
 
-/* GET todo. */
-singleRouter.get('/', async (req, res) => {
-  res.sendStatus(405); // Implement this
-});
-
-/* PUT todo. */
 singleRouter.put('/', async (req, res) => {
-  res.sendStatus(405); // Implement this
+  try {
+    const { text, done } = req.body;
+    if (text !== undefined) req.todo.text = text;
+    if (done !== undefined) req.todo.done = done;
+    const updated = await req.todo.save();
+    res.json(updated);
+  } catch (error) {
+    console.error('Failed to update todo:', error);
+    res.status(400).json({ error: 'Failed to update todo' });
+  }
 });
 
-router.use('/:id', findByIdMiddleware, singleRouter)
+singleRouter.delete('/', async (req, res) => {
+  try {
+    await req.todo.deleteOne();
+    res.sendStatus(204);
+  } catch (error) {
+    console.error('Failed to delete todo:', error);
+    res.status(500).json({ error: 'Failed to delete todo' });
+  }
+});
 
+// Liitä middlewaren ja yksittäisen todo-reitit `/todos/:id`
+router.use('/:id', findByIdMiddleware, singleRouter);
 
 module.exports = router;

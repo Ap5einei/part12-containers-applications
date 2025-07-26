@@ -1,20 +1,29 @@
-version: '3.8'
-services:
-  backend:
-    build: .
-    ports:
-      - "3000:3000"
-    env_file:
-      - .env
-    depends_on:
-      - mongodb
+version: "3.8"
 
+services:
   mongodb:
     image: mongo:6-jammy
+    container_name: mongodb-1
     ports:
       - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: the_username  # Vaihda haluamaasi käyttäjään
+      MONGO_INITDB_ROOT_PASSWORD: the_password  # Vaihda haluamaasi salasanaan
+      MONGO_INITDB_DATABASE: the_database       # Tietokannan nimi
     volumes:
       - mongo-data:/data/db
+    command: ["mongod", "--auth"]
+  
+  todo-backend:
+    build: .
+    container_name: todo-backend
+    ports:
+      - "3000:3000"
+    environment:
+      MONGO_URL: mongodb://the_username:the_password@mongodb:27017/the_database
+      PORT: 3000
+    depends_on:
+      - mongodb
 
 volumes:
   mongo-data:
