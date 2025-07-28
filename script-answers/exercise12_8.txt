@@ -1,0 +1,42 @@
+# Tehtävä 12.8: MongoDB-manuaalinen todo-kohteen lisäys Docker-kontissa
+
+1. Docker Compose -ympäristö käynnissä:
+   - Backend-kontti: part12-containers-applications-app-1
+   - MongoDB-kontti: todo-backend-mongodb-1
+
+2. MongoDB-konttiin yhdistäminen:
+
+   docker exec -it todo-backend-mongodb-1 mongosh
+
+3. Mongo shell -komennot:
+
+   show dbs
+
+   use the_database
+
+   show collections
+   # Tuloste: todos
+
+   db.todos.find({})
+   # Tuloste:
+   # [
+   #   {
+   #     _id: ObjectId('6884a3cccf61b26ce689b03d'),
+   #     text: 'Increase the number of tool inmy tool belt',
+   #     done: false
+   #   }
+   # ]
+
+4. Uuden todo-kohteen lisäys (jos tehtävässä tarvittiin):
+
+   db.todos.insertOne({ text: "Increase the number of tools in my tool belt", done: false })
+
+5. Backendin kautta todo-kohteen tarkastus:
+
+   - Avasin selaimessa osoitteen: http://localhost:3000/todos
+   - Todo-kohde näkyi listalla onnistuneesti.
+
+---
+
+Kaikki vaiheet onnistuivat ja todo-kohde tallentui sekä näkyy backend-palvelun kautta.
+
