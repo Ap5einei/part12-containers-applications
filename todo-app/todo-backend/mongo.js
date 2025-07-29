@@ -1,20 +1,17 @@
-// mongo.js
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
+const Todo = require('./mongo/models/todo')
 
-const MONGO_URL = process.env.MONGO_URL || 'mongodb://localhost:27017/the_database';
+const mongoUrl = process.env.MONGO_URL
 
-mongoose.connect(MONGO_URL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+mongoose.connection.on('error', err => {
+  console.error('MongoDB connection error:', err)
 })
-.then(() => console.log('Connected to MongoDB'))
-.catch(err => console.error('MongoDB connection error:', err));
 
-const todoSchema = new mongoose.Schema({
-  text: String,
-  done: Boolean,
-});
+mongoose.connect(mongoUrl)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => {
+    console.error('MongoDB connection error:', err)
+    process.exit(1)
+  })
 
-const Todo = mongoose.model('Todo', todoSchema);
-
-module.exports = { Todo };
+module.exports = { Todo }
