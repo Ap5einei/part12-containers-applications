@@ -1,27 +1,32 @@
+// routes/todos.js
 const express = require('express');
-const { Todo } = require('../mongo');
-const { getAsync, setAsync } = require('../redis/redis');
 const router = express.Router();
+const { Todo } = require('../mongo');
+const { incrAsync } = require('../redis');
 
-// POST /todos - lisää uusi todo ja kasvata Redisissä laskuria
+router.get('/', async (req, res) => {
+  try {
+    const todos = await Todo.find({});
+    res.json(todos);
+  } catch (error) {
+    console.error('Failed to fetch todos:', error);
+    res.status(500).json({ error: 'Failed to fetch todos' });
+  }
+});
+
 router.post('/', async (req, res) => {
   try {
-    const todo = await Todo.create({
+    const todo = new Todo({
       text: req.body.text,
       done: false
     });
+    const savedTodo = await todo.save();
 
-    // Kasvata laskuria
-    try {
-      let count = await getAsync('added_todos');
-      count = count ? parseInt(count) : 0;
-      await setAsync('added_todos', count + 1);
-    } catch (redisError) {
-      console.error('Redis error incrementing counter:', redisError);
-    }
+    await incrAsync('added_todos');
 
-    res.status(201).json(todo);
+    res.status(201).json(savedTodo);
   } catch (error) {
+    console.error('Failed to create todo:', error);
     res.status(400).json({ error: 'Failed to create todo' });
   }
 });

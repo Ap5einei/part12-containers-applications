@@ -1,20 +1,20 @@
+// app.js
+require('dotenv').config();
 const express = require('express');
-const logger = require('morgan');
-const cors = require('cors');
-const statisticsRouter = require('./routes/statistics');
-const indexRouter = require('./routes/index');
-const todosRouter = require('./routes/todos');
-
 const app = express();
 
-// Middlewaret ennen reittejä
-app.use(cors());
-app.use(logger('dev'));
+const todosRouter = require('./routes/todos');
+const statisticsRouter = require('./routes/statistics');
+
 app.use(express.json());
 
-// Reitit
-app.use('/statistics', statisticsRouter);
 app.use('/todos', todosRouter);
-app.use('/', indexRouter);
+app.use('/', statisticsRouter);
+
+// Virheenkäsittely middleware
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: 'Internal Server Error' });
+});
 
 module.exports = app;

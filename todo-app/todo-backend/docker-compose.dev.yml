@@ -1,15 +1,18 @@
 version: '3.9'
+
 services:
-  app:
-    build: .
+  mongodb:
+    image: mongo:6-jammy
+    container_name: mongodb-1
     ports:
-      - "3000:3000"
+      - "27017:27017"
     environment:
-      - MONGO_URL=mongodb://mongodb-1:27017/the_database?authSource=admin
-      - REDIS_URL=redis://redis:6379
-    depends_on:
-      - redis
-      - mongodb-1
+      MONGO_INITDB_ROOT_USERNAME: the_username
+      MONGO_INITDB_ROOT_PASSWORD: the_password
+      MONGO_INITDB_DATABASE: the_database
+    volumes:
+      - mongo-data:/data/db
+    command: ["mongod", "--auth"]
     networks:
       - backend-net
 
@@ -20,12 +23,23 @@ services:
     networks:
       - backend-net
 
-  mongodb-1:
-    image: mongo:6-jammy
+  todo-backend:
+    build: .
+    container_name: todo-backend
     ports:
-      - "27017:27017"
+      - "3000:3000"
+    environment:
+      MONGO_URL: mongodb://the_username:the_password@mongodb:27017/the_database?authSource=admin
+      REDIS_URL: redis://redis:6379
+      PORT: 3000
+    depends_on:
+      - mongodb
+      - redis
     networks:
       - backend-net
+
+volumes:
+  mongo-data:
 
 networks:
   backend-net:

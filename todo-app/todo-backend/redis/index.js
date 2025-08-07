@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const Todo = require('./mongo/models/todo')
+const Todo = require('../mongo/models/Todo')
 const redisClient = require('./redis');  // Redis-yhteys
 
 app.use(express.json());

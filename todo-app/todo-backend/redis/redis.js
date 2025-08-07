@@ -1,11 +1,26 @@
-// redis/redis.js
+// redis.js
 const redis = require('redis');
-const client = redis.createClient({ url: process.env.REDIS_URL });
 
-client.connect(); // muista async jos haluat odottaa valmiiksi!
+const redisUrl = process.env.REDIS_URL;
+const client = redis.createClient({
+  url: redisUrl
+});
+
+client.on('error', (err) => console.error('Redis Client Error', err));
+
+async function connectRedis() {
+  if (!client.isOpen) {
+    await client.connect();
+    console.log('Redis client connected');
+  }
+}
 
 async function getAsync(key) {
   return await client.get(key);
+}
+
+async function setAsync(key, value) {
+  return await client.set(key, value);
 }
 
 async function incrAsync(key) {
@@ -13,7 +28,9 @@ async function incrAsync(key) {
 }
 
 module.exports = {
+  client,
+  connectRedis,
   getAsync,
-  incrAsync,
-  client
+  setAsync,
+  incrAsync
 };

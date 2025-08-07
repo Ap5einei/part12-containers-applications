@@ -1,17 +1,20 @@
-const mongoose = require('mongoose')
-const Todo = require('./mongo/models/todo')
+const mongoose = require('mongoose');
 
-const mongoUrl = process.env.MONGO_URL
+const mongoUrl = process.env.MONGO_URL;
 
-mongoose.connection.on('error', err => {
-  console.error('MongoDB connection error:', err)
-})
+mongoose.connection.on('connected', () => {
+  console.log('Connected to MongoDB');
+});
 
-mongoose.connect(mongoUrl)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch(err => {
-    console.error('MongoDB connection error:', err)
-    process.exit(1)
-  })
+mongoose.connection.on('error', (err) => {
+  console.error('MongoDB connection error:', err);
+});
 
-module.exports = { Todo }
+async function connectDB() {
+  await mongoose.connect(mongoUrl, {
+    serverSelectionTimeoutMS: 5000,  // tarvittaessa timeout-asetus
+  });
+  console.log('MongoDB connection established');
+}
+
+module.exports = { connectDB };
