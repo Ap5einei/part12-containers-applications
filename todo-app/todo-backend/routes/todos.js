@@ -2,8 +2,9 @@
 const express = require('express');
 const router = express.Router();
 const { Todo } = require('../mongo');
-const { incrAsync } = require('../redis');
+const { redisClient } = require('../redis'); // päivitetään redisClient async-asiakas
 
+// GET /api/todos - hae kaikki todo-kohteet
 router.get('/', async (req, res) => {
   try {
     const todos = await Todo.find({});
@@ -14,6 +15,7 @@ router.get('/', async (req, res) => {
   }
 });
 
+// POST /api/todos - luo uusi todo-kohde
 router.post('/', async (req, res) => {
   try {
     const todo = new Todo({
@@ -22,7 +24,12 @@ router.post('/', async (req, res) => {
     });
     const savedTodo = await todo.save();
 
-    await incrAsync('added_todos');
+    // Lisää Redis-laskuriin async/await tyylillä
+    if (redisClient.isOpen) {
+      await redisClient.incr('added_todos');
+    } else {
+      console.warn('Redis client not connected, skipping increment');
+    }
 
     res.status(201).json(savedTodo);
   } catch (error) {
