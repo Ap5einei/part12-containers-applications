@@ -1,27 +1,29 @@
-// app.js
 require('dotenv').config();
 const express = require('express');
 const app = express();
 
+// Muut importit ja middlewaret
+
+// Reitit
 const todosRouter = require('./routes/todos');
 const statisticsRouter = require('./routes/statistics');
 
-const { connectRedis } = require('./redis'); // tuo redis yhteyden muodostusfunktio
+// Tietokantayhteydet
+const { connectRedis } = require('./redis');
+const { connectDB } = require('./mongo');
 
 (async () => {
   try {
     await connectRedis();
-    console.log('Redis connected successfully');
+    await connectDB();
+    console.log('Connected to Redis and MongoDB');
   } catch (err) {
-    console.error('Failed to connect to Redis', err);
-    // Voit halutessasi lopettaa sovelluksen, jos redis on kriittinen
+    console.error('Failed to connect to databases:', err);
     // process.exit(1);
   }
 })();
 
 app.use(express.json());
-
-// Käytä API-polkuja, voit vaihtoehtoisesti säilyttää nykyiset "/todos" jne.
 app.use('/api/todos', todosRouter);
 app.use('/api/statistics', statisticsRouter);
 
@@ -31,4 +33,5 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal Server Error' });
 });
 
+// Tärkeää: Exporttaa express-sovellus
 module.exports = app;
