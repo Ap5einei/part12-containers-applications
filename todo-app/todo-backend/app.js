@@ -9,7 +9,7 @@ const todosRouter = require('./routes/todos');
 const statisticsRouter = require('./routes/statistics');
 
 // Tietokantayhteydet
-const { connectRedis } = require('./redis');
+const { connectRedis } = require('./redis/redis');
 const { connectDB } = require('./mongo');
 
 (async () => {
@@ -33,5 +33,5 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal Server Error' });
 });
 
-// Tärkeää: Exporttaa express-sovellus
+// Exporttaa express-sovellus
 module.exports = app;
