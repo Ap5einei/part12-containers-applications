@@ -1,37 +1,32 @@
-require('dotenv').config();
+// todo-backend/app.js
 const express = require('express');
+const Todo = require('./mongo/models/Todo');
+const redisClient = require('./redis/index');
 const app = express();
-
-// Muut importit ja middlewaret
-
-// Reitit
-const todosRouter = require('./routes/todos');
-const statisticsRouter = require('./routes/statistics');
-
-// Tietokantayhteydet
-const { connectRedis } = require('./redis/redis');
-const { connectDB } = require('./mongo');
-
-(async () => {
-  try {
-    await connectRedis();
-    await connectDB();
-    console.log('Connected to Redis and MongoDB');
-  } catch (err) {
-    console.error('Failed to connect to databases:', err);
-    // process.exit(1);
-  }
-})();
-
 app.use(express.json());
-app.use('/api/todos', todosRouter);
-app.use('/api/statistics', statisticsRouter);
 
-// Virheenkäsittely middleware
-app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err);
-  res.status(500).json({ error: 'Internal Server Error' });
+// POST /todos - lisää uuden todo-tehtävän ja kasvattaa Redis-laskuria
+app.post('/todos', async (req, res) => {
+  try {
+    const todo = new Todo({ text: req.body.text });
+    const savedTodo = await todo.save();
+
+    await redisClient.incr('added_todos');
+
+    res.status(201).json(savedTodo);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-// Exporttaa express-sovellus
+// GET /statistics - palauttaa lisättyjen todojen määrän Redisistä
+app.get('/statistics', async (req, res) => {
+  try {
+    const count = await redisClient.get('added_todos') || '0';
+    res.json({ added_todos: Number(count) });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = app;
